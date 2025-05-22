@@ -77,12 +77,45 @@ $(document).ready(function() {
         },
         
         // 랜덤 문제 가져오기
-        getRandom: function() {
+        // getRandom: function() {
+        //     const questions = this.getAll();
+        //     if (questions.length === 0) return null;
+        //     const randomIndex = Math.floor(Math.random() * questions.length);
+        //     return questions[randomIndex];
+        // },
+
+        // 순차적으로 문제 가져오기
+        getNext: function() {
             const questions = this.getAll();
             if (questions.length === 0) return null;
-            const randomIndex = Math.floor(Math.random() * questions.length);
-            return questions[randomIndex];
+
+            const CURRENT_INDEX_KEY = 'CURRENT_QUESTION_INDEX';
+            let currentIndex = parseInt(localStorage.getItem(CURRENT_INDEX_KEY)) || 0;
+
+            const question = questions[currentIndex];
+
+            // 다음 인덱스 저장 (끝에 도달하면 처음으로)
+            currentIndex = (currentIndex + 1) % questions.length;
+            localStorage.setItem(CURRENT_INDEX_KEY, currentIndex.toString());
+
+            return question;
         },
+
+        // 순차적으로 이전 문제 가져오기
+        getPrevious: function() {
+            const questions = this.getAll();
+            if (questions.length === 0) return null;
+
+            const CURRENT_INDEX_KEY = 'CURRENT_QUESTION_INDEX';
+            let currentIndex = parseInt(localStorage.getItem(CURRENT_INDEX_KEY)) || 0;
+
+            // 이전 인덱스 (0보다 작아지면 마지막으로)
+            currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+            localStorage.setItem(CURRENT_INDEX_KEY, currentIndex.toString());
+
+            return questions[currentIndex];
+        },
+
         
         // 데이터 통계
         getStats: function() {
@@ -195,7 +228,6 @@ $(document).ready(function() {
         const existingQuestions = QuestionManager.getAll();
         if (existingQuestions.length === 0) {
             $.getScript('./script/quiz.js');
-
             
             dummyQuestions.forEach(dummy => {
                 QuestionManager.add(dummy.question, dummy.answer, dummy.keywords);
@@ -289,8 +321,12 @@ $(document).ready(function() {
     
     // 현재 문제 표시
     let currentQuestion = null;
-    function displayCurrentQuestion() {
-        const question = QuestionManager.getRandom();
+    function displayCurrentQuestion(direction = 'next') {
+        //const question = QuestionManager.getRandom();
+        //const question = QuestionManager.getNext();
+        const question = direction === 'prev'
+        ? QuestionManager.getPrevious()
+        : QuestionManager.getNext();
         if (question) {
             currentQuestion = question;
             $('.question-text').text(question.question);
@@ -353,8 +389,24 @@ $(document).ready(function() {
 
     // 새 문제 버튼
     $('#newQuestionBtn').click(function() {
+        // $(this).find('i').addClass('fa-spin');
+        // displayCurrentQuestion();
+        // setTimeout(() => {
+        //     $(this).find('i').removeClass('fa-spin');
+        // }, 500);
+
+        const CURRENT_INDEX_KEY = 'CURRENT_QUESTION_INDEX';
+    
+        // 현재 인덱스를 0으로 설정
+        localStorage.setItem(CURRENT_INDEX_KEY, '0');
+
+        // 아이콘 회전 효과 시작
         $(this).find('i').addClass('fa-spin');
-        displayCurrentQuestion();
+        
+        // 첫 번째 문제 표시
+        displayCurrentQuestion();  // 이미 내부적으로 getNext 또는 getPrevious 사용하므로, 현재 인덱스를 0으로 설정하면 1번 문제가 나옵니다.
+        
+        // 회전 효과 종료
         setTimeout(() => {
             $(this).find('i').removeClass('fa-spin');
         }, 500);
@@ -506,8 +558,14 @@ $(document).ready(function() {
     });
 
     // 이전/다음 버튼
-    $('#prevBtn, #nextBtn').click(function() {
-        displayCurrentQuestion();
+    // $('#prevBtn, #nextBtn').click(function() {
+    //     displayCurrentQuestion();
+    // });
+    $('#prevBtn').click(function() {
+        displayCurrentQuestion('prev');
+    });
+    $('#nextBtn').click(function() {
+        displayCurrentQuestion('next');
     });
 
     // 반응형 헤더 조정
