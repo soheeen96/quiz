@@ -94,28 +94,108 @@ $(document).ready(function() {
             };
         }
     };
+
+    // ===== 키워드 하이라이트 시스템 =====
+    const HighlightManager = {
+        // 텍스트에서 키워드 하이라이트
+        highlightKeywords: function(text, keywords) {
+            if (!text || !keywords || keywords.length === 0) {
+                return { 
+                    highlightedText: text || '', 
+                    matchedKeywords: [],
+                    matchCount: 0 
+                };
+            }
+            
+            let highlightedText = text;
+            const matchedKeywords = [];
+            let matchCount = 0;
+            
+            // 키워드를 길이순으로 정렬 (긴 키워드부터 처리하여 중복 방지)
+            const sortedKeywords = [...keywords].sort((a, b) => b.length - a.length);
+            
+            sortedKeywords.forEach(keyword => {
+                if (keyword.trim().length === 0) return;
+                
+                // 대소문자 구분 없이 검색
+                const regex = new RegExp(`(${this.escapeRegExp(keyword.trim())})`, 'gi');
+                const matches = text.match(regex);
+                
+                if (matches) {
+                    matchedKeywords.push({
+                        keyword: keyword.trim(),
+                        count: matches.length
+                    });
+                    matchCount += matches.length;
+                    
+                    // 하이라이트 적용
+                    highlightedText = highlightedText.replace(regex, 
+                        '<span class="highlight-keyword">$1</span>'
+                    );
+                }
+            });
+            
+            return {
+                highlightedText,
+                matchedKeywords,
+                matchCount
+            };
+        },
+        
+        // 정규식 특수문자 이스케이프
+        escapeRegExp: function(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        },
+        
+        // 답안 미리보기 업데이트
+        updatePreview: function(userAnswer, currentQuestion) {
+            const $preview = $('#answerPreview');
+            const $stats = $('#keywordStats');
+            
+            if (!userAnswer.trim()) {
+                $preview.removeClass('show');
+                $stats.removeClass('show');
+                return;
+            }
+            
+            if (!currentQuestion || !currentQuestion.keywords) {
+                $preview.html(userAnswer).addClass('show');
+                $stats.removeClass('show');
+                return;
+            }
+            
+            const result = this.highlightKeywords(userAnswer, currentQuestion.keywords);
+            
+            // 미리보기 업데이트
+            $preview.html(result.highlightedText || userAnswer).addClass('show');
+            
+            // 통계 업데이트
+            if (result.matchCount > 0) {
+                const keywordDetails = result.matchedKeywords
+                    .map(item => `${item.keyword}(${item.count})`)
+                    .join(', ');
+                
+                $stats.html(`
+                    <i class="fas fa-chart-bar"></i> 
+                    키워드 매칭: <span class="keyword-count">${result.matchCount}개</span> 발견
+                    <br><small style="opacity: 0.8;">발견된 키워드: ${keywordDetails}</small>
+                `).addClass('show');
+            } else {
+                $stats.html(`
+                    <i class="fas fa-search"></i> 
+                    키워드 매칭: <span class="keyword-count">0개</span> 발견
+                `).addClass('show');
+            }
+        }
+    };
     
     // ===== 초기 더미 데이터 생성 =====
+    
     function initializeDummyData() {
         const existingQuestions = QuestionManager.getAll();
         if (existingQuestions.length === 0) {
-            const dummyQuestions = [
-                {
-                    question: "JavaScript에서 변수를 선언하는 키워드 3가지는 무엇인가요?",
-                    answer: "var, let, const입니다. var은 함수 스코프, let과 const는 블록 스코프를 가지며, const는 재할당이 불가능합니다.",
-                    keywords: "var, let, const, 변수, 선언"
-                },
-                {
-                    question: "HTML5에서 새로 추가된 시맨틱 태그들을 3개 이상 말해보세요.",
-                    answer: "header, nav, section, article, aside, footer, main 등이 있습니다.",
-                    keywords: "header, nav, section, article, aside, footer, main, 시맨틱"
-                },
-                {
-                    question: "CSS에서 박스 모델의 구성 요소 4가지는 무엇인가요?",
-                    answer: "content, padding, border, margin입니다. 안쪽부터 순서대로 콘텐츠, 패딩, 보더, 마진입니다.",
-                    keywords: "content, padding, border, margin, 박스모델, 콘텐츠, 패딩, 보더, 마진"
-                }
-            ];
+            $.getScript('./script/quiz.js');
+
             
             dummyQuestions.forEach(dummy => {
                 QuestionManager.add(dummy.question, dummy.answer, dummy.keywords);
@@ -216,10 +296,21 @@ $(document).ready(function() {
             $('.question-text').text(question.question);
             $('#correctAnswer').text(question.answer);
             $('.question-number').text(`문제 ${QuestionManager.getAll().findIndex(q => q.id === question.id) + 1}`);
+            
+            // 답안 입력창과 미리보기 초기화
+            $('.answer-input').val('');
+            $('#answerPreview').removeClass('show');
+            $('#keywordStats').removeClass('show');
         } else {
+            currentQuestion = null;
             $('.question-text').text('등록된 문제가 없습니다. "문제 관리"에서 문제를 등록해주세요!');
             $('#correctAnswer').text('');
             $('.question-number').text('문제 0');
+            
+            // 답안 관련 요소들 초기화
+            $('.answer-input').val('');
+            $('#answerPreview').removeClass('show');
+            $('#keywordStats').removeClass('show');
         }
     }
     
@@ -269,6 +360,36 @@ $(document).ready(function() {
         }, 500);
     });
 
+    // 답안 입력 시 실시간 키워드 하이라이트
+    $('.answer-input').on('input', function() {
+        const userAnswer = $(this).val();
+        HighlightManager.updatePreview(userAnswer, currentQuestion);
+    });
+
+    // 키워드 확인 버튼
+    $('#highlightBtn').click(function() {
+        const $preview = $('#answerPreview');
+        const $stats = $('#keywordStats');
+        const userAnswer = $('.answer-input').val().trim();
+        
+        if (!userAnswer) {
+            alert('답안을 먼저 입력해주세요.');
+            $('.answer-input').focus();
+            return;
+        }
+        
+        if ($preview.hasClass('show')) {
+            // 숨기기
+            $preview.removeClass('show');
+            $stats.removeClass('show');
+            $(this).html('<i class="fas fa-highlighter"></i> 키워드 확인');
+        } else {
+            // 보이기
+            HighlightManager.updatePreview(userAnswer, currentQuestion);
+            $(this).html('<i class="fas fa-highlighter"></i> 키워드 숨기기');
+        }
+    });
+
     // 정답 토글 기능
     $('#toggleAnswerBtn').click(function() {
         const $answerDisplay = $('#answerDisplay');
@@ -283,98 +404,6 @@ $(document).ready(function() {
     });
 
     // 문제 등록 폼
-    $('#questionForm').submit(function(e) {
-        e.preventDefault();
-        
-        const question = $('#questionInput').val().trim();
-        const answer = $('#answerInput').val().trim();
-        const keywords = $('#keywordsInput').val().trim();
-        
-        if (question && answer && keywords) {
-            const newQuestion = QuestionManager.add(question, answer, keywords);
-            
-            if (newQuestion) {
-                // 성공 메시지
-                const $submitBtn = $(this).find('button[type="submit"]');
-                const originalText = $submitBtn.html();
-                $submitBtn.html('<i class="fas fa-check"></i> 등록 완료!').prop('disabled', true);
-                
-                setTimeout(() => {
-                    $submitBtn.html(originalText).prop('disabled', false);
-                }, 1500);
-                
-                // 폼 리셋
-                this.reset();
-                
-                // 목록 업데이트
-                renderQuestionList();
-                
-                console.log('새 문제 등록:', newQuestion);
-            } else {
-                alert('문제 등록에 실패했습니다. 다시 시도해주세요.');
-            }
-        } else {
-            alert('모든 필드를 입력해주세요.');
-        }
-    });
-
-    // 문제 삭제 및 수정 이벤트 (이벤트 위임)
-    $(document).on('click', '.btn-delete', function() {
-        const questionId = $(this).closest('.question-item').data('id');
-        const question = QuestionManager.findById(questionId);
-        
-        if (question && confirm(`"${question.question.substring(0, 50)}..." 문제를 삭제하시겠습니까?`)) {
-            if (QuestionManager.delete(questionId)) {
-                $(this).closest('.question-item').fadeOut(300, function() {
-                    $(this).remove();
-                    renderQuestionList();
-                });
-            } else {
-                alert('문제 삭제에 실패했습니다.');
-            }
-        }
-    });
-
-    $(document).on('click', '.btn-edit', function() {
-        const questionId = $(this).closest('.question-item').data('id');
-        const question = QuestionManager.findById(questionId);
-        
-        if (question) {
-            // 폼에 기존 데이터 채우기
-            $('#questionInput').val(question.question);
-            $('#answerInput').val(question.answer);
-            $('#keywordsInput').val(question.keywords.join(', '));
-            
-            // 폼 제출 버튼 임시 변경
-            const $form = $('#questionForm');
-            const $submitBtn = $form.find('button[type="submit"]');
-            const originalText = $submitBtn.html();
-            
-            $submitBtn.html('<i class="fas fa-save"></i> 수정 완료').data('editing', questionId);
-            
-            // 폼 상단으로 스크롤
-            $('html, body').animate({
-                scrollTop: $form.offset().top - 100
-            }, 500);
-            
-            // 취소 버튼 추가
-            if (!$form.find('.btn-cancel').length) {
-                $submitBtn.after('<button type="button" class="btn btn-secondary btn-cancel" style="margin-left: 10px;"><i class="fas fa-times"></i> 취소</button>');
-            }
-        }
-    });
-
-    // 수정 취소
-    $(document).on('click', '.btn-cancel', function() {
-        const $form = $('#questionForm');
-        const $submitBtn = $form.find('button[type="submit"]');
-        
-        $form[0].reset();
-        $submitBtn.html('<i class="fas fa-save"></i> 문제 등록').removeData('editing');
-        $(this).remove();
-    });
-
-    // 폼 제출 시 수정 모드 처리
     $('#questionForm').submit(function(e) {
         e.preventDefault();
         
@@ -421,6 +450,61 @@ $(document).ready(function() {
         }
     });
 
+    // 문제 삭제 및 수정 이벤트 (이벤트 위임)
+    $(document).on('click', '.btn-delete', function() {
+        const questionId = $(this).closest('.question-item').data('id');
+        const question = QuestionManager.findById(questionId);
+        
+        if (question && confirm(`"${question.question.substring(0, 50)}..." 문제를 삭제하시겠습니까?`)) {
+            if (QuestionManager.delete(questionId)) {
+                $(this).closest('.question-item').fadeOut(300, function() {
+                    $(this).remove();
+                    renderQuestionList();
+                });
+            } else {
+                alert('문제 삭제에 실패했습니다.');
+            }
+        }
+    });
+
+    $(document).on('click', '.btn-edit', function() {
+        const questionId = $(this).closest('.question-item').data('id');
+        const question = QuestionManager.findById(questionId);
+        
+        if (question) {
+            // 폼에 기존 데이터 채우기
+            $('#questionInput').val(question.question);
+            $('#answerInput').val(question.answer);
+            $('#keywordsInput').val(question.keywords.join(', '));
+            
+            // 폼 제출 버튼 임시 변경
+            const $form = $('#questionForm');
+            const $submitBtn = $form.find('button[type="submit"]');
+            
+            $submitBtn.html('<i class="fas fa-save"></i> 수정 완료').data('editing', questionId);
+            
+            // 폼 상단으로 스크롤
+            $('html, body').animate({
+                scrollTop: $form.offset().top - 100
+            }, 500);
+            
+            // 취소 버튼 추가
+            if (!$form.find('.btn-cancel').length) {
+                $submitBtn.after('<button type="button" class="btn btn-secondary btn-cancel" style="margin-left: 10px;"><i class="fas fa-times"></i> 취소</button>');
+            }
+        }
+    });
+
+    // 수정 취소
+    $(document).on('click', '.btn-cancel', function() {
+        const $form = $('#questionForm');
+        const $submitBtn = $form.find('button[type="submit"]');
+        
+        $form[0].reset();
+        $submitBtn.html('<i class="fas fa-save"></i> 문제 등록').removeData('editing');
+        $(this).remove();
+    });
+
     // 이전/다음 버튼
     $('#prevBtn, #nextBtn').click(function() {
         displayCurrentQuestion();
@@ -447,6 +531,8 @@ $(document).ready(function() {
     
     // 개발자 도구용 전역 변수
     window.QuestionManager = QuestionManager;
+    window.HighlightManager = HighlightManager;
     console.log('문제 관리 시스템 초기화 완료');
+    console.log('키워드 하이라이트 시스템 초기화 완료');
     console.log('현재 저장된 문제 수:', QuestionManager.getStats().total);
 });
