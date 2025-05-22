@@ -374,7 +374,7 @@ body {
         font-size: 13px;
     }
 
-    .question-nav {
+    /* .question-nav {
         flex-direction: column;
         align-items: center;
     }
@@ -382,7 +382,7 @@ body {
     .answer-toggle {
         flex-direction: column;
         align-items: center;
-    }
+    } */
 }
 
 @media (max-width: 480px) {
