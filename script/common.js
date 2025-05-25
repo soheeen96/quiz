@@ -450,6 +450,40 @@ $(document).ready(function () {
     }, 500);
   });
 
+  // 문제 번호 입력으로 이동하는 기능
+  $("#goToQuestionBtn").click(function () {
+    const CURRENT_INDEX_KEY = "CURRENT_QUESTION_INDEX";
+
+    // 입력 필드에서 숫자 가져오기
+    const questionNumber = parseInt($("#questionNumberInput").val());
+
+    // 입력값 검증
+    if (isNaN(questionNumber) || questionNumber < 1) {
+      alert("올바른 문제 번호를 입력해주세요 (1 이상의 숫자)");
+      return;
+    }
+
+    // 문제 번호를 인덱스로 변환 (문제 번호는 1부터 시작, 인덱스는 0부터 시작)
+    const targetIndex = questionNumber - 1;
+
+    // localStorage에 해당 인덱스 설정
+    localStorage.setItem(CURRENT_INDEX_KEY, targetIndex.toString());
+
+    // 버튼 애니메이션 시작
+    $(this).find("i").addClass("fa-spin");
+
+    // 해당 문제 표시
+    displayCurrentQuestion();
+
+    // 애니메이션 종료
+    setTimeout(() => {
+      $(this).find("i").removeClass("fa-spin");
+    }, 500);
+
+    // 입력 필드 초기화 (선택사항)
+    $("#questionNumberInput").val("");
+  });
+
   // 답안 입력 시 실시간 키워드 하이라이트
   $(".answer-input").on("input", function () {
     const userAnswer = $(this).val();
