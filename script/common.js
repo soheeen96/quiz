@@ -431,24 +431,24 @@ $(document).ready(function () {
     showPage("quizPage");
   });
 
-  // 새 문제 버튼
-  $("#newQuestionBtn").click(function () {
-    // $(this).find('i').addClass('fa-spin');
-    // displayCurrentQuestion();
-    // setTimeout(() => {
-    //     $(this).find('i').removeClass('fa-spin');
-    // }, 500);
+  // // 새 문제 버튼
+  // $("#newQuestionBtn").click(function () {
+  //   // $(this).find('i').addClass('fa-spin');
+  //   // displayCurrentQuestion();
+  //   // setTimeout(() => {
+  //   //     $(this).find('i').removeClass('fa-spin');
+  //   // }, 500);
 
-    const CURRENT_INDEX_KEY = "CURRENT_QUESTION_INDEX";
+  //   const CURRENT_INDEX_KEY = "CURRENT_QUESTION_INDEX";
 
-    // 현재 인덱스를 0으로 설정
-    localStorage.setItem(CURRENT_INDEX_KEY, "0");
-    $(this).find("i").addClass("fa-spin");
-    displayCurrentQuestion(); // 이미 내부적으로 getNext 또는 getPrevious 사용하므로, 현재 인덱스를 0으로 설정하면 1번 문제가 나옵니다.
-    setTimeout(() => {
-      $(this).find("i").removeClass("fa-spin");
-    }, 500);
-  });
+  //   // 현재 인덱스를 0으로 설정
+  //   localStorage.setItem(CURRENT_INDEX_KEY, "0");
+  //   $(this).find("i").addClass("fa-spin");
+  //   displayCurrentQuestion(); // 이미 내부적으로 getNext 또는 getPrevious 사용하므로, 현재 인덱스를 0으로 설정하면 1번 문제가 나옵니다.
+  //   setTimeout(() => {
+  //     $(this).find("i").removeClass("fa-spin");
+  //   }, 500);
+  // });
 
   // 문제 번호 입력으로 이동하는 기능
   $("#goToQuestionBtn").click(function () {
