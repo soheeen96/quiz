@@ -6,7 +6,7 @@
 
 body {
   font-family: "Noto Sans KR", sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f1f1f1;
   min-height: 100vh;
   color: #333;
 }
@@ -27,7 +27,6 @@ body {
   padding: 20px 30px;
   border-radius: 20px;
   margin-bottom: 30px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -38,7 +37,7 @@ body {
 .header h1 {
   font-size: 28px;
   font-weight: 600;
-  color: #4a5568;
+  color: #666;
   margin: 0;
 }
 
@@ -64,19 +63,19 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #787878;
   color: white;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  border-color: #212121;
 }
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.9);
-  color: #4a5568;
-  border: 2px solid #e2e8f0;
+  color: #212121;
+  border-color: #212121;
 }
 
 .btn-secondary:hover {
@@ -86,7 +85,7 @@ body {
 }
 .btn-num {
   width: 100px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #e1e1e1;
 }
 
 /* 메인 컨텐츠 영역 */
@@ -117,12 +116,11 @@ body {
   backdrop-filter: blur(10px);
   padding: 40px;
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
 .question-number {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #787878;
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
@@ -135,7 +133,7 @@ body {
 .question-text {
   font-size: 24px;
   font-weight: 500;
-  color: #2d3748;
+  color: #212121;
   line-height: 1.6;
   margin-bottom: 30px;
   min-height: 60px;
@@ -157,13 +155,12 @@ body {
   backdrop-filter: blur(10px);
   padding: 40px;
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .answer-input {
   width: 100%;
   padding: 15px 20px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #e1e1e1;
   border-radius: 12px;
   font-size: 16px;
   font-family: inherit;
@@ -175,7 +172,7 @@ body {
 
 .answer-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #787878;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -269,7 +266,7 @@ body {
 .form-section h2 {
   font-size: 24px;
   font-weight: 600;
-  color: #2d3748;
+  color: #212121;
   margin-bottom: 25px;
   text-align: center;
 }
@@ -281,7 +278,7 @@ body {
 .form-group label {
   display: block;
   font-weight: 500;
-  color: #4a5568;
+  color: #444;
   margin-bottom: 8px;
 }
 
@@ -304,7 +301,7 @@ body {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #787878;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -319,14 +316,14 @@ body {
 .question-list h2 {
   font-size: 24px;
   font-weight: 600;
-  color: #2d3748;
+  color: #212121;
   margin-bottom: 25px;
   text-align: center;
 }
 
 .empty-state {
   text-align: center;
-  color: #718096;
+  color: #787878;
   font-size: 16px;
   padding: 40px 20px;
 }
