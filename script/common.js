@@ -138,6 +138,115 @@ $(document).ready(function () {
     },
   };
 
+  // // ===== 키워드 하이라이트 시스템 =====
+  // const HighlightManager = {
+  //   // 텍스트에서 키워드 하이라이트
+  //   highlightKeywords: function (text, keywords) {
+  //     if (!text || !keywords || keywords.length === 0) {
+  //       return {
+  //         highlightedText: text || "",
+  //         matchedKeywords: [],
+  //         matchCount: 0,
+  //       };
+  //     }
+
+  //     let highlightedText = text;
+  //     const matchedKeywords = [];
+  //     let matchCount = 0;
+
+  //     // 키워드를 길이순으로 정렬 (긴 키워드부터 처리하여 중복 방지)
+  //     const sortedKeywords = [...keywords].sort((a, b) => b.length - a.length);
+
+  //     sortedKeywords.forEach(keyword => {
+  //       if (keyword.trim().length === 0) return;
+
+  //       // 대소문자 구분 없이 검색
+  //       const regex = new RegExp(
+  //         `(${this.escapeRegExp(keyword.trim())})`,
+  //         "gi"
+  //       );
+  //       const matches = text.match(regex);
+
+  //       if (matches) {
+  //         matchedKeywords.push({
+  //           keyword: keyword.trim(),
+  //           count: matches.length,
+  //         });
+  //         matchCount += matches.length;
+
+  //         // 하이라이트 적용
+  //         highlightedText = highlightedText.replace(
+  //           regex,
+  //           '<span class="highlight-keyword">$1</span>'
+  //         );
+  //       }
+  //     });
+
+  //     return {
+  //       highlightedText,
+  //       matchedKeywords,
+  //       matchCount,
+  //     };
+  //   },
+
+  //   // 정규식 특수문자 이스케이프
+  //   escapeRegExp: function (string) {
+  //     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  //   },
+
+  //   // 답안 미리보기 업데이트
+  //   updatePreview: function (userAnswer, currentQuestion) {
+  //     const $preview = $("#answerPreview");
+  //     const $stats = $("#keywordStats");
+
+  //     if (!userAnswer.trim()) {
+  //       $preview.removeClass("show");
+  //       $stats.removeClass("show");
+  //       return;
+  //     }
+
+  //     if (!currentQuestion || !currentQuestion.keywords) {
+  //       $preview.html(userAnswer).addClass("show");
+  //       $stats.removeClass("show");
+  //       return;
+  //     }
+
+  //     const result = this.highlightKeywords(
+  //       userAnswer,
+  //       currentQuestion.keywords
+  //     );
+
+  //     // 미리보기 업데이트
+  //     $preview.html(result.highlightedText || userAnswer).addClass("show");
+
+  //     // 통계 업데이트
+  //     if (result.matchCount > 0) {
+  //       const keywordDetails = result.matchedKeywords
+  //         .map(item => `${item.keyword}(${item.count})`)
+  //         .join(", ");
+
+  //       $stats
+  //         .html(
+  //           `
+  //                   <i class="fas fa-chart-bar"></i>
+  //                   키워드 매칭: <span class="keyword-count">${result.matchCount}개</span> 발견
+  //                   <br><small style="opacity: 0.8;">발견된 키워드: ${keywordDetails}</small>
+  //               `
+  //         )
+  //         .addClass("show");
+  //     } else {
+  //       $stats
+  //         .html(
+  //           `
+  //                   <i class="fas fa-search"></i>
+  //                   키워드 매칭: <span class="keyword-count">0개</span> 발견
+  //               `
+  //         )
+  //         .addClass("show");
+  //     }
+  //   },
+  // };
+
   // ===== 키워드 하이라이트 시스템 =====
   const HighlightManager = {
     // 텍스트에서 키워드 하이라이트
@@ -216,6 +325,11 @@ $(document).ready(function () {
         currentQuestion.keywords
       );
 
+      // 전체 키워드 개수 계산 (중복 제거된 유효한 키워드만)
+      const totalKeywords = currentQuestion.keywords.filter(
+        keyword => keyword && keyword.trim().length > 0
+      ).length;
+
       // 미리보기 업데이트
       $preview.html(result.highlightedText || userAnswer).addClass("show");
 
@@ -228,19 +342,19 @@ $(document).ready(function () {
         $stats
           .html(
             `
-                    <i class="fas fa-chart-bar"></i> 
-                    키워드 매칭: <span class="keyword-count">${result.matchCount}개</span> 발견
-                    <br><small style="opacity: 0.8;">발견된 키워드: ${keywordDetails}</small>
-                `
+                  <i class="fas fa-chart-bar"></i> 
+                  키워드 매칭: <span class="keyword-count">${result.matchCount}</span> / <span class="keyword-total">${totalKeywords}개</span> 발견
+                  <br><small style="opacity: 0.8;">발견된 키워드: ${keywordDetails}</small>
+              `
           )
           .addClass("show");
       } else {
         $stats
           .html(
             `
-                    <i class="fas fa-search"></i> 
-                    키워드 매칭: <span class="keyword-count">0개</span> 발견
-                `
+                  <i class="fas fa-search"></i> 
+                  키워드 매칭: <span class="keyword-count">0</span> / <span class="keyword-total">${totalKeywords}개</span> 발견
+              `
           )
           .addClass("show");
       }
