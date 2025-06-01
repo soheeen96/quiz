@@ -58,23 +58,23 @@ $(document).ready(function () {
     },
 
     // 문제 수정
-    update: function (id, question, answer, keywords) {
-      const questions = this.getAll();
-      const index = questions.findIndex(q => q.id === id);
-      if (index !== -1) {
-        questions[index] = {
-          ...questions[index],
-          question: question.trim(),
-          answer: answer.trim(),
-          keywords: keywords
-            .split(",")
-            .map(k => k.trim())
-            .filter(k => k),
-        };
-        return this.save(questions);
-      }
-      return false;
-    },
+    // update: function (id, question, answer, keywords) {
+    //   const questions = this.getAll();
+    //   const index = questions.findIndex(q => q.id === id);
+    //   if (index !== -1) {
+    //     questions[index] = {
+    //       ...questions[index],
+    //       question: question.trim(),
+    //       answer: answer.trim(),
+    //       keywords: keywords
+    //         .split(",")
+    //         .map(k => k.trim())
+    //         .filter(k => k),
+    //     };
+    //     return this.save(questions);
+    //   }
+    //   return false;
+    // },
 
     // ID로 문제 찾기
     findById: function (id) {
@@ -406,6 +406,7 @@ $(document).ready(function () {
                             <span style="background: #667eea; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">
                                 문제 ${index + 1}
                             </span>
+                            <!--
                             <div style="display: flex; gap: 8px;">
                                 <button class="btn-edit" style="
                                     background: #48bb78; color: white; border: none; padding: 6px 12px; 
@@ -420,6 +421,7 @@ $(document).ready(function () {
                                     <i class="fas fa-trash"></i> 삭제
                                 </button>
                             </div>
+                            -->
                         </div>
                         <div style="margin-bottom: 10px;">
                             <strong style="color: #2d3748;">문제:</strong>
@@ -642,131 +644,131 @@ $(document).ready(function () {
   });
 
   // 문제 등록 폼
-  $("#questionForm").submit(function (e) {
-    e.preventDefault();
+  // $("#questionForm").submit(function (e) {
+  //   e.preventDefault();
 
-    const $submitBtn = $(this).find('button[type="submit"]');
-    const editingId = $submitBtn.data("editing");
+  //   const $submitBtn = $(this).find('button[type="submit"]');
+  //   const editingId = $submitBtn.data("editing");
 
-    const question = $("#questionInput").val().trim();
-    const answer = $("#answerInput").val().trim();
-    const keywords = $("#keywordsInput").val().trim();
+  //   const question = $("#questionInput").val().trim();
+  //   const answer = $("#answerInput").val().trim();
+  //   const keywords = $("#keywordsInput").val().trim();
 
-    if (question && answer && keywords) {
-      let success = false;
+  //   if (question && answer && keywords) {
+  //     let success = false;
 
-      if (editingId) {
-        // 수정 모드
-        success = QuestionManager.update(editingId, question, answer, keywords);
-        if (success) {
-          $submitBtn
-            .html('<i class="fas fa-check"></i> 수정 완료!')
-            .prop("disabled", true);
-          setTimeout(() => {
-            $submitBtn
-              .html('<i class="fas fa-save"></i> 문제 등록')
-              .prop("disabled", false)
-              .removeData("editing");
-            $(".btn-cancel").remove();
-          }, 1500);
-        }
-      } else {
-        // 등록 모드
-        const newQuestion = QuestionManager.add(question, answer, keywords);
-        success = !!newQuestion;
-        if (success) {
-          $submitBtn
-            .html('<i class="fas fa-check"></i> 등록 완료!')
-            .prop("disabled", true);
-          setTimeout(() => {
-            $submitBtn
-              .html('<i class="fas fa-save"></i> 문제 등록')
-              .prop("disabled", false);
-          }, 1500);
-        }
-      }
+  //     if (editingId) {
+  //       // 수정 모드
+  //       success = QuestionManager.update(editingId, question, answer, keywords);
+  //       if (success) {
+  //         $submitBtn
+  //           .html('<i class="fas fa-check"></i> 수정 완료!')
+  //           .prop("disabled", true);
+  //         setTimeout(() => {
+  //           $submitBtn
+  //             .html('<i class="fas fa-save"></i> 문제 등록')
+  //             .prop("disabled", false)
+  //             .removeData("editing");
+  //           $(".btn-cancel").remove();
+  //         }, 1500);
+  //       }
+  //     } else {
+  //       // 등록 모드
+  //       const newQuestion = QuestionManager.add(question, answer, keywords);
+  //       success = !!newQuestion;
+  //       if (success) {
+  //         $submitBtn
+  //           .html('<i class="fas fa-check"></i> 등록 완료!')
+  //           .prop("disabled", true);
+  //         setTimeout(() => {
+  //           $submitBtn
+  //             .html('<i class="fas fa-save"></i> 문제 등록')
+  //             .prop("disabled", false);
+  //         }, 1500);
+  //       }
+  //     }
 
-      if (success) {
-        this.reset();
-        renderQuestionList();
-      } else {
-        alert("작업에 실패했습니다. 다시 시도해주세요.");
-      }
-    } else {
-      alert("모든 필드를 입력해주세요.");
-    }
-  });
+  //     if (success) {
+  //       this.reset();
+  //       renderQuestionList();
+  //     } else {
+  //       alert("작업에 실패했습니다. 다시 시도해주세요.");
+  //     }
+  //   } else {
+  //     alert("모든 필드를 입력해주세요.");
+  //   }
+  // });
 
   // 문제 삭제 및 수정 이벤트 (이벤트 위임)
-  $(document).on("click", ".btn-delete", function () {
-    const questionId = $(this).closest(".question-item").data("id");
-    const question = QuestionManager.findById(questionId);
+  // $(document).on("click", ".btn-delete", function () {
+  //   const questionId = $(this).closest(".question-item").data("id");
+  //   const question = QuestionManager.findById(questionId);
 
-    if (
-      question &&
-      confirm(
-        `"${question.question.substring(0, 50)}..." 문제를 삭제하시겠습니까?`
-      )
-    ) {
-      if (QuestionManager.delete(questionId)) {
-        $(this)
-          .closest(".question-item")
-          .fadeOut(300, function () {
-            $(this).remove();
-            renderQuestionList();
-          });
-      } else {
-        alert("문제 삭제에 실패했습니다.");
-      }
-    }
-  });
+  //   if (
+  //     question &&
+  //     confirm(
+  //       `"${question.question.substring(0, 50)}..." 문제를 삭제하시겠습니까?`
+  //     )
+  //   ) {
+  //     if (QuestionManager.delete(questionId)) {
+  //       $(this)
+  //         .closest(".question-item")
+  //         .fadeOut(300, function () {
+  //           $(this).remove();
+  //           renderQuestionList();
+  //         });
+  //     } else {
+  //       alert("문제 삭제에 실패했습니다.");
+  //     }
+  //   }
+  // });
 
-  $(document).on("click", ".btn-edit", function () {
-    const questionId = $(this).closest(".question-item").data("id");
-    const question = QuestionManager.findById(questionId);
+  // $(document).on("click", ".btn-edit", function () {
+  //   const questionId = $(this).closest(".question-item").data("id");
+  //   const question = QuestionManager.findById(questionId);
 
-    if (question) {
-      // 폼에 기존 데이터 채우기
-      $("#questionInput").val(question.question);
-      $("#answerInput").val(question.answer);
-      $("#keywordsInput").val(question.keywords.join(", "));
+  //   if (question) {
+  //     // 폼에 기존 데이터 채우기
+  //     $("#questionInput").val(question.question);
+  //     $("#answerInput").val(question.answer);
+  //     $("#keywordsInput").val(question.keywords.join(", "));
 
-      // 폼 제출 버튼 임시 변경
-      const $form = $("#questionForm");
-      const $submitBtn = $form.find('button[type="submit"]');
+  //     // 폼 제출 버튼 임시 변경
+  //     const $form = $("#questionForm");
+  //     const $submitBtn = $form.find('button[type="submit"]');
 
-      $submitBtn
-        .html('<i class="fas fa-save"></i> 수정 완료')
-        .data("editing", questionId);
+  //     $submitBtn
+  //       .html('<i class="fas fa-save"></i> 수정 완료')
+  //       .data("editing", questionId);
 
-      // 폼 상단으로 스크롤
-      $("html, body").animate(
-        {
-          scrollTop: $form.offset().top - 100,
-        },
-        500
-      );
+  //     // 폼 상단으로 스크롤
+  //     $("html, body").animate(
+  //       {
+  //         scrollTop: $form.offset().top - 100,
+  //       },
+  //       500
+  //     );
 
-      // 취소 버튼 추가
-      if (!$form.find(".btn-cancel").length) {
-        $submitBtn.after(
-          '<button type="button" class="btn btn-secondary btn-cancel" style="margin-left: 10px;"><i class="fas fa-times"></i> 취소</button>'
-        );
-      }
-    }
-  });
+  //     // 취소 버튼 추가
+  //     if (!$form.find(".btn-cancel").length) {
+  //       $submitBtn.after(
+  //         '<button type="button" class="btn btn-secondary btn-cancel" style="margin-left: 10px;"><i class="fas fa-times"></i> 취소</button>'
+  //       );
+  //     }
+  //   }
+  // });
 
   // 수정 취소
-  $(document).on("click", ".btn-cancel", function () {
-    const $form = $("#questionForm");
-    const $submitBtn = $form.find('button[type="submit"]');
+  // $(document).on("click", ".btn-cancel", function () {
+  //   const $form = $("#questionForm");
+  //   const $submitBtn = $form.find('button[type="submit"]');
 
-    $form[0].reset();
-    $submitBtn
-      .html('<i class="fas fa-save"></i> 문제 등록')
-      .removeData("editing");
-    $(this).remove();
-  });
+  //   $form[0].reset();
+  //   $submitBtn
+  //     .html('<i class="fas fa-save"></i> 문제 등록')
+  //     .removeData("editing");
+  //   $(this).remove();
+  // });
 
   // 이전/다음 버튼
   // $('#prevBtn, #nextBtn').click(function() {
